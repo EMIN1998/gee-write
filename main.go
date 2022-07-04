@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"gee-rewrite/src"
+	"gee-rewrite/gee"
+	//"gee-rewrite/src"
 	"log"
 	"net/http"
 )
@@ -10,7 +11,8 @@ import (
 func main() {
 	//http.HandleFunc("/", indexHandler)
 	//http.HandleFunc("/hello", helloHandler)
-	engine := new(src.Engine)
+	r := gee.New()
+	r.GET
 	log.Fatal(http.ListenAndServe(":9999", engine))
 }
 
