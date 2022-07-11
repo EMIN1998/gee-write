@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"gee-rewrite/gee"
-	//"gee-rewrite/src"
-	"log"
 	"net/http"
 )
 
@@ -12,8 +10,9 @@ func main() {
 	//http.HandleFunc("/", indexHandler)
 	//http.HandleFunc("/hello", helloHandler)
 	r := gee.New()
-	r.GET
-	log.Fatal(http.ListenAndServe(":9999", engine))
+	r.GET("/hello", helloHandler)
+	//fmt.r.RUN("2500")
+	fmt.Errorf("======= %v", r.RUN("127.0.0.1:2500"))
 }
 
 // handler echoes r.URL.Path

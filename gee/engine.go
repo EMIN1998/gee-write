@@ -12,8 +12,8 @@ type Engine struct {
 type HandleFunc func(w http.ResponseWriter, r *http.Request)
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	path := req.URL.Path
-	if v, ok := e.router[path]; !ok {
+	k := fmt.Sprintf("%s-%s",req.Method, req.URL.Path)
+	if v, ok := e.router[k]; !ok {
 		fmt.Fprint(w, "404")
 	} else {
 		v(w, req)
