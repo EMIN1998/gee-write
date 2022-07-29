@@ -10,7 +10,9 @@ type node struct {
 func (n *node) matchPath(part string) *node {
 	for _, v := range n.children {
 		if v.part == part {
-			return
+			return v
 		}
 	}
+
+	return nil
 }
