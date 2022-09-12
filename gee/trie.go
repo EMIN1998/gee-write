@@ -55,6 +55,8 @@ func (n *node) insert(pattern string, parts []string, height int) {
 }
 
 // 查找
+// /p/:lang/doc只有在第三层节点，即doc节点，pattern才会设置为/p/:lang/doc。
+// p和:lang节点的pattern属性皆为空。因此，当匹配结束时，我们可以使用n.pattern == ""来判断路由规则是否匹配成功
 func (n *node) search(parts []string, height int) *node {
 	if len(parts) == height || strings.HasPrefix(n.part, "*") {
 		if n.pattern == "" {

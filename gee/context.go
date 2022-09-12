@@ -12,6 +12,7 @@ type Context struct {
 	Path       string
 	Method     string
 	StatusCode int
+	Params     map[string]string
 }
 
 type H map[string]interface{}
@@ -66,4 +67,12 @@ func (c *Context) HTML(code int, html string) {
 	c.SetHeader("Content-Type", "text/html")
 	c.StatusCode = code
 	c.Writer.Write([]byte(html))
+}
+
+func (c *Context) GetParams(key string) string {
+	if val, ok := c.Params[key]; ok {
+		return val
+	}
+
+	return ""
 }

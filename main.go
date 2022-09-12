@@ -21,9 +21,9 @@ func indexHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // handler echoes r.URL.Header
-func helloHandler(w http.ResponseWriter, req *http.Request) {
-	for k, v := range req.Header {
-		fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
+func helloHandler(ctx *gee.Context) {
+	for k, v := range ctx.Request.Header {
+		fmt.Fprintf(ctx.Writer, "Header[%q] = %q\n", k, v)
 	}
 
 	fmt.Print("request income")
