@@ -2,6 +2,7 @@ package gee
 
 import (
 	"fmt"
+	logger "github.com/amoghe/distillog"
 	"net/http"
 	"strings"
 )
@@ -19,12 +20,17 @@ func NewRouters() *router {
 }
 
 func (r *router) handle(c *Context) {
-	key := fmt.Sprintf("%s-%s", c.Method, c.Path)
-	if handler, ok := r.handlers[key]; !ok {
+	n, params := r.getRouter(c.Method, c.Path)
+	if n == nil {
+		logger.Infoln("[VISIT]", c.Method, "\b", "PATH:", c.Path, "status:", http.StatusNotFound)
 		c.String(http.StatusNotFound, "404 NOT FOUND path:%s", c.Path)
-	} else {
-		handler(c)
+		return
 	}
+
+	key := fmt.Sprintf("%s-%s", c.Method, n.pattern)
+	logger.Infoln("[VISIT]", c.Method, "\b", "PATH:", c.Path, "status:", http.StatusOK)
+	c.Params = params
+	r.handlers[key](c)
 }
 
 func parsePattern(pattern string) []string {

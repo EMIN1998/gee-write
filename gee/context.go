@@ -2,7 +2,9 @@ package gee
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -34,6 +36,32 @@ func (c *Context) Query(key string) string {
 	return c.Request.URL.Query().Get(key)
 }
 
+func (c *Context) ParseBody(dst interface{}) (err error) {
+	if c.Request == nil {
+		err := errors.New("request is empty")
+		return err
+	}
+
+	if c.Request.Body == nil {
+		err = fmt.Errorf(" r.Body为空.URL:%s", c.Request.RequestURI)
+		return
+	}
+
+	postData, er := ioutil.ReadAll(c.Request.Body)
+	if er != nil {
+		err = fmt.Errorf(" ReadAll发生异常. URL:%s err:%s", c.Request.RequestURI, er)
+		return
+	}
+	defer c.Request.Body.Close()
+
+	err = json.Unmarshal(postData, &dst)
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
 func (c *Context) SetHeader(key, value string) {
 	c.Writer.Header().Set(key, value)
 }
@@ -46,7 +74,8 @@ func (c *Context) Status(code int) {
 func (c *Context) String(code int, format string, value ...interface{}) {
 	c.SetHeader("Content-Type", "text/plain")
 	c.StatusCode = code
-	c.Writer.Write([]byte(fmt.Sprint(format, value)))
+	msg := fmt.Sprintf(format, value...)
+	c.Writer.Write([]byte(msg))
 }
 
 func (c *Context) Json(code int, obj interface{}) {
