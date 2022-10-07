@@ -2,21 +2,34 @@ package gee
 
 import (
 	logger "github.com/amoghe/distillog"
+	"html/template"
 	"net/http"
 	"reflect"
 	"runtime"
+	"strings"
 )
 
 type Engine struct {
 	*RouterGroup
-	router *router
-	groups []*RouterGroup
+	router        *router
+	groups        []*RouterGroup
+	httpTemplates *template.Template
+	funcMap       template.FuncMap
 }
 
 type HandleFunc func(ctx *Context)
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	var middlewares []HandleFunc
+	for _, group := range e.groups {
+		if strings.HasPrefix(req.URL.Path, group.Prefix) {
+			middlewares = append(middlewares, group.middleware...)
+		}
+	}
+
 	c := NewContext(req, w)
+	c.handlers = middlewares
+	c.engine = e
 	e.router.handle(c)
 }
 
@@ -62,9 +75,10 @@ func (e *Engine) RUN(addr string) error {
 	return http.ListenAndServe(addr, e)
 }
 
-func (e *Engine) Group(prefix string) *RouterGroup {
-	return &RouterGroup{
-		engine: e,
-		Prefix: prefix,
-	}
+func (e *Engine) SetFuncMap(funcMap template.FuncMap) {
+	e.funcMap = funcMap
+}
+
+func (e *Engine) LoadHTMLGlob(pattern string) {
+	e.httpTemplates = template.Must(template.New("").Funcs(e.funcMap).ParseGlob(pattern))
 }

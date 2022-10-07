@@ -30,7 +30,8 @@ func (r *router) handle(c *Context) {
 	key := fmt.Sprintf("%s-%s", c.Method, n.pattern)
 	logger.Infoln("[VISIT]", c.Method, "\b", "PATH:", c.Path, "status:", http.StatusOK)
 	c.Params = params
-	r.handlers[key](c)
+	c.handlers = append(c.handlers, r.handlers[key])
+	c.Next()
 }
 
 func parsePattern(pattern string) []string {

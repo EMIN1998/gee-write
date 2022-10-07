@@ -1,5 +1,10 @@
 package gee
 
+import (
+	"net/http"
+	"path"
+)
+
 type RouterGroup struct {
 	engine     *Engine
 	Prefix     string
@@ -32,4 +37,29 @@ func (r *RouterGroup) GET(path string, handleFunc HandleFunc) {
 
 func (r *RouterGroup) POST(path string, handleFunc HandleFunc) {
 	r.addRouter(POST, path, handleFunc)
+}
+
+func (r *RouterGroup) Use(middlewares ...HandleFunc) {
+	r.middleware = append(r.middleware, middlewares...)
+}
+
+func (r *RouterGroup) createStaticHandler(filePath string, fs http.FileSystem) HandleFunc {
+	absolutePath := path.Join(r.Prefix, filePath)
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+
+	return func(c *Context) {
+		file := c.GetParams("filepath")
+		if _, err := fs.Open(file); err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		fileServer.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func (r *RouterGroup) Static(realPath string, root string) {
+	handler := r.createStaticHandler(realPath, http.Dir(root))
+	urlPattern := path.Join(realPath, "*filepath")
+	r.GET(urlPattern, handler)
 }
