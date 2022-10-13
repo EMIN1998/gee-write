@@ -118,6 +118,7 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/assets", "./static")
 
+	// test
 	stu1 := &student{Name: "Geektutu", Age: 20}
 	stu2 := &student{Name: "Jack", Age: 22}
 	r.GET("/", func(c *gee.Context) {
